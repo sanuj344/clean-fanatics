@@ -3,6 +3,7 @@ import cors from "cors";
 import prisma from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
 import testRoutes from "./routes/test.routes.js";
+import serviceRoutes from "./routes/service.routes.js";
 
 
 const app = express();
@@ -20,6 +21,7 @@ app.get("/test-db", async (req, res) => {
 });
 app.use("/api/auth", authRoutes);
 app.use("/api/test", testRoutes);
+app.use("/api/services", serviceRoutes);
 
 
 
