@@ -6,6 +6,10 @@ import testRoutes from "./routes/test.routes.js";
 import serviceRoutes from "./routes/service.routes.js";
 import bookingRoutes from "./routes/booking.routes.js";
 import providerRoutes from "./routes/provider.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
+
+
+
 
 const app = express();
 
@@ -26,5 +30,7 @@ app.use("/api/services", serviceRoutes);
 app.use("/api/bookings", bookingRoutes);
 
 app.use("/api/provider", providerRoutes);
+app.use("/api/admin", adminRoutes);
+
 
 export default app;
