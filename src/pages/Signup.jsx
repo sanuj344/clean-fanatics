@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import './Login.css';
 
@@ -85,14 +85,20 @@ const Signup = () => {
             >
               <option value="CUSTOMER">Customer</option>
               <option value="PROVIDER">Provider</option>
+              <option value="ADMIN">Admin (Demo Only)</option>
             </select>
+            {role === 'ADMIN' && (
+              <small style={{ color: '#ff9800', display: 'block', marginTop: '4px' }}>
+                ⚠️ Admin signup is for demonstration purposes only
+              </small>
+            )}
           </div>
           <button type="submit" disabled={loading} className="btn-primary">
             {loading ? 'Signing up...' : 'Sign Up'}
           </button>
         </form>
         <p className="auth-link">
-          Already have an account? <a href="/login">Login</a>
+          Already have an account? <Link to="/login">Login</Link>
         </p>
       </div>
     </div>

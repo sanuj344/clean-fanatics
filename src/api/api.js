@@ -67,4 +67,10 @@ export const adminAPI = {
   overrideBooking: (id, data) => api.post(`/admin/bookings/${id}/override`, data),
 };
 
+// Payment APIs
+export const paymentAPI = {
+  createOrder: (data) => api.post('/payments/create-order', data),
+  verifyPayment: (data) => api.post('/payments/verify', data),
+};
+
 export default api;

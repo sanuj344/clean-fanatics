@@ -28,7 +28,13 @@ export const createCreditOrder = async (req, res) => {
     },
   });
 
-  res.json(order);
+  // Return order with Razorpay key_id (public key, safe to expose)
+  res.json({
+    orderId: order.id,
+    amount: order.amount,
+    currency: order.currency,
+    key: process.env.RAZORPAY_KEY_ID,
+  });
 };
 
 export const verifyPayment = async (req, res) => {

@@ -2,12 +2,15 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import { serviceAPI } from '../../api/api';
+import BuyCredits from './BuyCredits';
 import './Customer.css';
 
 const Home = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showBuyCredits, setShowBuyCredits] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const { user, logout, updateUser } = useAuth();
   const navigate = useNavigate();
 
@@ -49,6 +52,12 @@ const Home = () => {
             <div className="credits-display">
               Credits: <span className="credits-value">{user?.credits || 0}</span>
             </div>
+            <button
+              onClick={() => setShowBuyCredits(true)}
+              className="btn-buy-credits"
+            >
+              Buy Credits
+            </button>
             <div className="user-info">
               {user?.name}
             </div>
@@ -59,6 +68,12 @@ const Home = () => {
 
       <main className="customer-main">
         {error && <div className="error-banner">{error}</div>}
+        {successMessage && (
+          <div className="success-banner">
+            {successMessage}
+            <button onClick={() => setSuccessMessage('')} className="close-banner">×</button>
+          </div>
+        )}
         <h2>Available Services</h2>
         <div className="services-grid">
           {services.length === 0 ? (
@@ -86,6 +101,17 @@ const Home = () => {
           )}
         </div>
       </main>
+
+      {showBuyCredits && (
+        <BuyCredits
+          onClose={() => setShowBuyCredits(false)}
+          onSuccess={(credits) => {
+            setSuccessMessage(`Successfully purchased ${credits} credits!`);
+            setShowBuyCredits(false);
+            setTimeout(() => setSuccessMessage(''), 5000);
+          }}
+        />
+      )}
     </div>
   );
 };

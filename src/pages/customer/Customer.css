@@ -44,6 +44,22 @@
   color: #666;
 }
 
+.btn-buy-credits {
+  padding: 8px 20px;
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+
+.btn-buy-credits:hover {
+  background: #45a049;
+}
+
 .btn-logout,
 .btn-secondary {
   padding: 8px 16px;
@@ -414,4 +430,155 @@
   border-radius: 8px;
   margin-bottom: 20px;
   text-align: center;
+}
+
+.success-banner {
+  background: #efe;
+  color: #3c3;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.close-banner {
+  background: none;
+  border: none;
+  color: #3c3;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 12px;
+  line-height: 1;
+}
+
+.close-banner:hover {
+  opacity: 0.7;
+}
+
+/* Credit Purchase Modal */
+.credit-modal {
+  max-width: 500px;
+  width: 90%;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #333;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 32px;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.3s;
+}
+
+.modal-close:hover {
+  background: #f0f0f0;
+}
+
+.credit-packages {
+  margin-bottom: 24px;
+}
+
+.credit-info {
+  margin: 0 0 16px 0;
+  color: #666;
+  font-weight: 500;
+}
+
+.package-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.package-card {
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.package-card:hover {
+  border-color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.package-card.selected {
+  border-color: #667eea;
+  background: #f0f4ff;
+}
+
+.package-credits {
+  font-size: 32px;
+  font-weight: 700;
+  color: #667eea;
+  margin-bottom: 8px;
+}
+
+.package-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.package-price {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.selected-package-info {
+  background: #f9f9f9;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.selected-package-info .info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.selected-package-info .info-row:last-child {
+  margin-bottom: 0;
+}
+
+.selected-package-info .info-row span {
+  color: #666;
+}
+
+.selected-package-info .info-row strong {
+  color: #333;
+  font-size: 18px;
 }
