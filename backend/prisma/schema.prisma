@@ -34,9 +34,11 @@ model User {
   // Relations
   customerBookings Booking[] @relation("CustomerBookings")
   providerBookings Booking[] @relation("ProviderBookings")
+  payments         Payment[]   // 🔹 inverse relation for payments
 
   @@map("users")
 }
+
 
 model Service {
   id          String   @id @default(uuid())
@@ -82,4 +84,19 @@ model BookingEvent {
   booking    Booking       @relation(fields: [bookingId], references: [id])
 
   @@map("booking_events")
+}
+
+
+model Payment {
+  id               String   @id @default(uuid())
+  userId           String
+  razorpayOrderId  String
+  razorpayPaymentId String?
+  creditsAdded     Int
+  status           String
+  createdAt        DateTime @default(now())
+
+  user             User     @relation(fields: [userId], references: [id])
+
+  @@map("payments")
 }
