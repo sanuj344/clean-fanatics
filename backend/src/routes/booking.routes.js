@@ -12,4 +12,11 @@ router.post(
   createBooking
 );
 
+router.get(
+  "/:bookingId",
+  authenticate,
+  getBookingWithEvents
+);
+
+
 export default router;
