@@ -5,7 +5,7 @@ import {
   createService,
   listServices,
 } from "../controllers/service.controller.js";
-
+import { getServices } from "../controllers/service.controller.js";
 const router = express.Router();
 
 // Admin creates service
@@ -18,5 +18,5 @@ router.post(
 
 // Customer lists services
 router.get("/", authenticate, listServices);
-
+router.get("/", getServices);
 export default router;

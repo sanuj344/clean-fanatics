@@ -1,7 +1,12 @@
 import express from "express";
 import { authenticate } from "../middleware/auth.middleware.js";
 import { authorizeRoles } from "../middleware/role.middleware.js";
-import { getAssignedBookings } from "../controllers/provider.controller.js";
+import {
+  getAssignedBookings,
+  acceptBooking,
+  rejectBooking,
+} from "../controllers/provider.controller.js";
+
 
 const router = express.Router();
 

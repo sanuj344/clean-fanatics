@@ -6,6 +6,22 @@ export const signup = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
+const allowedRoles = ["CUSTOMER", "PROVIDER"];
+
+if (
+  role === "ADMIN" &&
+  process.env.ALLOW_ADMIN_SIGNUP === "true"
+) {
+  allowedRoles.push("ADMIN");
+}
+
+if (!allowedRoles.includes(role)) {
+  return res.status(403).json({
+    message: "Role not allowed",
+  });
+}
+
+
     if (!name || !email || !password) {
       return res.status(400).json({ message: "Missing required fields" });
     }
@@ -74,5 +90,25 @@ export const login = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Login failed" });
+  }
+};
+
+
+export const getMe = async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        credits: true,
+      },
+    });
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch user" });
   }
 };

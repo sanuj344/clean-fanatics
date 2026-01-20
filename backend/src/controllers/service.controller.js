@@ -35,3 +35,9 @@ export const listServices = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch services" });
   }
 };
+
+
+export const getServices = async (req, res) => {
+  const services = await prisma.service.findMany();
+  res.json(services);
+};
