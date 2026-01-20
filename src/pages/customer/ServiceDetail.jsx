@@ -12,6 +12,13 @@ const ServiceDetail = () => {
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showBookingForm, setShowBookingForm] = useState(false);
+  const [bookingData, setBookingData] = useState({
+    houseNumber: '',
+    landmark: '',
+    addressLabel: 'HOME',
+    phone: user?.phone || '',
+  });
 
   useEffect(() => {
     fetchService();
@@ -41,11 +48,30 @@ const ServiceDetail = () => {
       return;
     }
 
+    // Validate address and phone
+    if (!bookingData.houseNumber.trim()) {
+      setError('House/Flat number is required');
+      return;
+    }
+
+    if (!bookingData.phone.trim()) {
+      setError('Phone number is required');
+      return;
+    }
+
     setBookingLoading(true);
     setError('');
 
     try {
-      const response = await bookingAPI.createBooking({ serviceId: service.id });
+      const response = await bookingAPI.createBooking({
+        serviceId: service.id,
+        address: {
+          houseNumber: bookingData.houseNumber,
+          landmark: bookingData.landmark,
+          label: bookingData.addressLabel,
+        },
+        phone: bookingData.phone,
+      });
       // Update user credits
       await updateUser();
       // Navigate to success page
@@ -118,17 +144,76 @@ const ServiceDetail = () => {
               </span>
             </div>
           </div>
-          <button
-            onClick={handleBook}
-            disabled={bookingLoading || user.credits < service.creditCost}
-            className="btn-book"
-          >
-            {bookingLoading
-              ? 'Booking...'
-              : user.credits < service.creditCost
-              ? 'Insufficient Credits'
-              : 'Book Now'}
-          </button>
+          {!showBookingForm ? (
+            <button
+              onClick={() => setShowBookingForm(true)}
+              disabled={user.credits < service.creditCost}
+              className="btn-book"
+            >
+              {user.credits < service.creditCost
+                ? 'Insufficient Credits'
+                : 'Book Now'}
+            </button>
+          ) : (
+            <div className="booking-form">
+              <h3>Booking Details</h3>
+              <div className="form-group">
+                <label>House/Flat Number *</label>
+                <input
+                  type="text"
+                  value={bookingData.houseNumber}
+                  onChange={(e) => setBookingData({ ...bookingData, houseNumber: e.target.value })}
+                  placeholder="A-12, Flat 403"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Landmark (optional)</label>
+                <input
+                  type="text"
+                  value={bookingData.landmark}
+                  onChange={(e) => setBookingData({ ...bookingData, landmark: e.target.value })}
+                  placeholder="Near Metro Station"
+                />
+              </div>
+              <div className="form-group">
+                <label>Save as</label>
+                <select
+                  value={bookingData.addressLabel}
+                  onChange={(e) => setBookingData({ ...bookingData, addressLabel: e.target.value })}
+                  className="form-select"
+                >
+                  <option value="HOME">Home</option>
+                  <option value="OTHER">Other</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Phone Number *</label>
+                <input
+                  type="tel"
+                  value={bookingData.phone}
+                  onChange={(e) => setBookingData({ ...bookingData, phone: e.target.value })}
+                  placeholder="+917082479244"
+                  required
+                />
+              </div>
+              <div className="booking-form-actions">
+                <button
+                  onClick={() => setShowBookingForm(false)}
+                  className="btn-secondary"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleBook}
+                  disabled={bookingLoading}
+                  className="btn-book"
+                >
+                  {bookingLoading ? 'Booking...' : 'Confirm Booking'}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>

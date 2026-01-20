@@ -6,17 +6,35 @@ import {
   acceptBooking,
   rejectBooking,
 } from "../controllers/provider.controller.js";
-
+import {
+  createProviderService,
+  getProviderServices,
+} from "../controllers/service.controller.js";
 
 const router = express.Router();
 
+// Provider services
+router.post(
+  "/services",
+  authenticate,
+  authorizeRoles("PROVIDER"),
+  createProviderService
+);
+
+router.get(
+  "/services",
+  authenticate,
+  authorizeRoles("PROVIDER"),
+  getProviderServices
+);
+
+// Provider bookings
 router.get(
   "/bookings",
   authenticate,
   authorizeRoles("PROVIDER"),
   getAssignedBookings
 );
-
 
 router.post(
   "/bookings/:bookingId/accept",
@@ -31,6 +49,5 @@ router.post(
   authorizeRoles("PROVIDER"),
   rejectBooking
 );
-
 
 export default router;

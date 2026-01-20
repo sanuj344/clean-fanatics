@@ -90,12 +90,17 @@ const Home = () => {
                 <p>{service.description || 'Professional service'}</p>
                 <div className="service-footer">
                   <div className="service-rating">
-                    ⭐ {service.ratingAvg?.toFixed(1) || 'N/A'}
+                    ⭐ {service.ratingAvg?.toFixed(1) || '0.0'}
                   </div>
                   <div className="service-cost">
                     {service.creditCost} credits
                   </div>
                 </div>
+                {service.provider && (
+                  <div className="service-provider">
+                    By: {service.provider.name}
+                  </div>
+                )}
               </div>
             ))
           )}

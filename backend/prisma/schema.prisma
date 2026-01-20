@@ -42,6 +42,7 @@ model User {
   // Relations
   customerBookings Booking[] @relation("CustomerBookings")
   providerBookings Booking[] @relation("ProviderBookings")
+  providerServices Service[] @relation("ProviderServices")
   payments         Payment[]   // 🔹 inverse relation for payments
   customerRatings Rating[] @relation("CustomerRatings")
 providerRatings Rating[] @relation("ProviderRatings")
@@ -58,20 +59,31 @@ model Service {
   description String?
   creditCost  Int
   ratingAvg   Float    @default(0)
+  providerId  String
   createdAt   DateTime @default(now())
 
+  provider    User     @relation("ProviderServices", fields: [providerId], references: [id])
   bookings    Booking[]
 
   @@map("services")
 }
 
+enum AddressLabel {
+  HOME
+  OTHER
+}
+
 model Booking {
-  id          String        @id @default(uuid())
-  customerId  String
-  providerId  String?
-  serviceId   String
-  status      BookingStatus @default(PENDING)
-  createdAt   DateTime      @default(now())
+  id            String        @id @default(uuid())
+  customerId    String
+  providerId    String?
+  serviceId     String
+  status        BookingStatus @default(PENDING)
+  houseNumber   String
+  landmark      String?
+  addressLabel  AddressLabel
+  phone         String
+  createdAt     DateTime      @default(now())
 
   customer    User          @relation("CustomerBookings", fields: [customerId], references: [id])
   provider    User?         @relation("ProviderBookings", fields: [providerId], references: [id])

@@ -56,6 +56,8 @@ export const bookingAPI = {
 
 // Provider APIs
 export const providerAPI = {
+  createService: (data) => api.post('/provider/services', data),
+  getMyServices: () => api.get('/provider/services'),
   getAssignedBookings: () => api.get('/provider/bookings'),
   acceptBooking: (id) => api.post(`/provider/bookings/${id}/accept`),
   rejectBooking: (id) => api.post(`/provider/bookings/${id}/reject`),

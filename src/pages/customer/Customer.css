@@ -432,6 +432,75 @@
   text-align: center;
 }
 
+.service-provider {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+  color: #666;
+  font-size: 14px;
+}
+
+.booking-form {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #eee;
+}
+
+.booking-form h3 {
+  margin: 0 0 20px 0;
+  color: #333;
+}
+
+.booking-form .form-group {
+  margin-bottom: 16px;
+}
+
+.booking-form .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #555;
+  font-weight: 500;
+}
+
+.booking-form .form-group input,
+.booking-form .form-select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.booking-form .form-group input:focus,
+.booking-form .form-select:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.booking-form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.booking-form-actions .btn-secondary {
+  flex: 1;
+  padding: 12px 24px;
+  background: #f0f0f0;
+  color: #333;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.booking-form-actions .btn-secondary:hover {
+  background: #e0e0e0;
+}
+
 .success-banner {
   background: #efe;
   color: #3c3;

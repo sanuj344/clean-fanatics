@@ -6,20 +6,42 @@ import { logBookingEvent } from "../services/bookingEvent.service.js";
  */
 export const createBooking = async (req, res) => {
   try {
-    const { serviceId } = req.body;
+    const { serviceId, address, phone } = req.body;
     const userId = req.user.userId;
 
     if (!serviceId) {
       return res.status(400).json({ message: "Service ID required" });
     }
 
-    // Fetch service
+    // Validate address and phone
+    if (!address || !address.houseNumber || !address.label) {
+      return res.status(400).json({ message: "Address details required" });
+    }
+
+    if (!phone) {
+      return res.status(400).json({ message: "Phone number required" });
+    }
+
+    // Validate phone format (basic validation)
+    const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+    if (!phoneRegex.test(phone.replace(/\s/g, ''))) {
+      return res.status(400).json({ message: "Invalid phone number format" });
+    }
+
+    // Fetch service with provider
     const service = await prisma.service.findUnique({
       where: { id: serviceId },
+      include: {
+        provider: true,
+      },
     });
 
     if (!service) {
       return res.status(404).json({ message: "Service not found" });
+    }
+
+    if (!service.providerId) {
+      return res.status(400).json({ message: "Service has no provider assigned" });
     }
 
     // Fetch customer
@@ -39,12 +61,17 @@ export const createBooking = async (req, res) => {
       },
     });
 
-    // Create booking (initially PENDING)
+    // Create booking with address and phone, assign to service owner
     const booking = await prisma.booking.create({
       data: {
         customerId: userId,
         serviceId: service.id,
-        status: "PENDING",
+        providerId: service.providerId, // Assign to service owner
+        status: "ASSIGNED", // Directly assign to service owner
+        houseNumber: address.houseNumber,
+        landmark: address.landmark || null,
+        addressLabel: address.label,
+        phone: phone,
       },
     });
 
@@ -56,8 +83,13 @@ export const createBooking = async (req, res) => {
       actor: "CUSTOMER",
     });
 
-    // Auto-assign provider
-    await assignProvider(booking.id);
+    // Log assignment event (directly assigned to service owner)
+    await logBookingEvent({
+      bookingId: booking.id,
+      fromStatus: "PENDING",
+      toStatus: "ASSIGNED",
+      actor: "SYSTEM",
+    });
 
     return res.status(201).json(booking);
   } catch (err) {
@@ -66,33 +98,11 @@ export const createBooking = async (req, res) => {
   }
 };
 
-/**
- * SYSTEM → Auto-assign provider
- */
+// Legacy function - no longer used (bookings assigned directly to service owner)
+// Kept for backward compatibility if needed
 export const assignProvider = async (bookingId) => {
-  const provider = await prisma.user.findFirst({
-    where: { role: "PROVIDER" },
-  });
-
-  if (!provider) return null;
-
-  const updatedBooking = await prisma.booking.update({
-    where: { id: bookingId },
-    data: {
-      providerId: provider.id,
-      status: "ASSIGNED",
-    },
-  });
-
-  // Log assignment event
-  await logBookingEvent({
-    bookingId,
-    fromStatus: "PENDING",
-    toStatus: "ASSIGNED",
-    actor: "SYSTEM",
-  });
-
-  return updatedBooking;
+  // This function is deprecated - bookings are now assigned directly to service owner
+  return null;
 };
 
 /**

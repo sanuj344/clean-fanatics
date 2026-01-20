@@ -122,6 +122,22 @@ const Dashboard = () => {
                       <span className="detail-value">{booking.provider.name}</span>
                     </div>
                   )}
+                  {booking.phone && (
+                    <div className="detail-item">
+                      <span className="detail-label">Phone:</span>
+                      <span className="detail-value">{booking.phone}</span>
+                    </div>
+                  )}
+                  {booking.houseNumber && (
+                    <div className="detail-item">
+                      <span className="detail-label">Address:</span>
+                      <span className="detail-value">
+                        {booking.houseNumber}
+                        {booking.landmark && `, ${booking.landmark}`}
+                        {booking.addressLabel && ` (${booking.addressLabel})`}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="booking-actions">
                   <button
