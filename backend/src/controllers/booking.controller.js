@@ -238,15 +238,15 @@ export const completeBooking = async (req, res) => {
       actor: "CUSTOMER",
     });
 
-    // Fetch updated events for response
-    const events = await prisma.bookingEvent.findMany({
+    // Fetch updated events for response (refetch to include the new completion event)
+    const updatedEvents = await prisma.bookingEvent.findMany({
       where: { bookingId },
       orderBy: { createdAt: "asc" },
     });
 
     return res.json({ 
       booking: updatedBooking, 
-      events 
+      events: updatedEvents 
     });
   } catch (err) {
     console.error("Complete booking error:", err);
