@@ -52,6 +52,7 @@ export const serviceAPI = {
 export const bookingAPI = {
   createBooking: (data) => api.post('/bookings', data),
   getBooking: (id) => api.get(`/bookings/${id}`),
+  completeBooking: (id) => api.patch(`/customer/bookings/${id}/complete`),
 };
 
 // Provider APIs

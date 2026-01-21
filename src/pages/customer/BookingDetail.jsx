@@ -12,6 +12,8 @@ const BookingDetail = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [completing, setCompleting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     fetchBooking();
@@ -44,6 +46,36 @@ const BookingDetail = () => {
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleString();
+  };
+
+  const handleCompleteBooking = async () => {
+    if (!booking) return;
+
+    setCompleting(true);
+    setError('');
+    setSuccessMessage('');
+
+    try {
+      const response = await bookingAPI.completeBooking(id);
+      // Update booking and events from response
+      setBooking(response.data.booking);
+      setEvents(response.data.events || []);
+      setSuccessMessage('Booking marked as completed successfully!');
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || 'Failed to complete booking';
+      setError(errorMsg);
+      console.error('Complete booking error:', err);
+    } finally {
+      setCompleting(false);
+    }
+  };
+
+  const shouldShowCompleteButton = () => {
+    if (!booking || !user) return false;
+    // Only show for CUSTOMER role
+    if (user.role !== 'CUSTOMER') return false;
+    // Only show for ASSIGNED or IN_PROGRESS status
+    return booking.status === 'ASSIGNED' || booking.status === 'IN_PROGRESS';
   };
 
   if (loading) {
@@ -81,6 +113,24 @@ const BookingDetail = () => {
       <main className="booking-detail-main">
         <div className="booking-detail-card">
           <h2>Booking Details</h2>
+          
+          {successMessage && (
+            <div className="success-banner">
+              <span>{successMessage}</span>
+              <button 
+                className="close-banner" 
+                onClick={() => setSuccessMessage('')}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+          )}
+
+          {error && (
+            <div className="error-banner">{error}</div>
+          )}
+
           <div className="booking-info-section">
             <div className="info-row">
               <span className="info-label">Status:</span>
@@ -114,6 +164,19 @@ const BookingDetail = () => {
               </div>
             )}
           </div>
+
+          {shouldShowCompleteButton() && (
+            <div style={{ marginBottom: '32px', paddingBottom: '24px', borderBottom: '1px solid #eee' }}>
+              <button
+                onClick={handleCompleteBooking}
+                disabled={completing}
+                className="btn-primary"
+                style={{ width: '100%' }}
+              >
+                {completing ? 'Marking as Completed...' : 'Mark as Completed'}
+              </button>
+            </div>
+          )}
 
           <div className="events-section">
             <h3>Booking Timeline</h3>
