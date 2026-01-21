@@ -177,6 +177,35 @@ export const completeBooking = async (req, res) => {
       return res.status(400).json({ message: "Cannot complete a cancelled booking" });
     }
 
+    // Check if booking was rejected by provider
+    // A booking is considered rejected if:
+    // 1. Status is PENDING
+    // 2. providerId is null (was unassigned)
+    // 3. There's an event showing ASSIGNED → PENDING by PROVIDER
+    const events = await prisma.bookingEvent.findMany({
+      where: { bookingId },
+      orderBy: { createdAt: "asc" },
+    });
+
+    // Check for rejection event: ASSIGNED → PENDING by PROVIDER
+    const rejectionEvent = events.find(
+      (event) =>
+        event.fromStatus === "ASSIGNED" &&
+        event.toStatus === "PENDING" &&
+        event.actor === "PROVIDER"
+    );
+
+    if (rejectionEvent || (booking.status === "PENDING" && !booking.providerId && events.some(e => e.toStatus === "ASSIGNED"))) {
+      return res.status(400).json({ message: "Booking was rejected by provider" });
+    }
+
+    // Validation: Prevent completing PENDING bookings (unless they were never assigned)
+    if (booking.status === "PENDING") {
+      return res.status(400).json({ 
+        message: "Cannot complete a pending booking. Booking must be accepted by provider first." 
+      });
+    }
+
     // Business rule: Only allow completion from ASSIGNED or IN_PROGRESS status
     if (booking.status !== "ASSIGNED" && booking.status !== "IN_PROGRESS") {
       return res.status(400).json({ 
@@ -197,6 +226,7 @@ export const completeBooking = async (req, res) => {
         service: true,
         customer: true,
         provider: true,
+        rating: true, // Include rating if exists
       },
     });
 

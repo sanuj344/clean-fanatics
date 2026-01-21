@@ -70,6 +70,8 @@ const BookingDetail = () => {
       // Update booking and events from response
       setBooking(response.data.booking);
       setEvents(response.data.events || []);
+      // Update existing rating if it exists in the response
+      setExistingRating(response.data.booking.rating || null);
       setSuccessMessage('Booking marked as completed successfully!');
     } catch (err) {
       const errorMsg = err.response?.data?.message || 'Failed to complete booking';
@@ -80,10 +82,33 @@ const BookingDetail = () => {
     }
   };
 
+  const isBookingRejected = () => {
+    if (!booking || !events) return false;
+    
+    // Check for rejection event: ASSIGNED → PENDING by PROVIDER
+    const rejectionEvent = events.find(
+      (event) =>
+        event.fromStatus === 'ASSIGNED' &&
+        event.toStatus === 'PENDING' &&
+        event.actor === 'PROVIDER'
+    );
+
+    // A booking is rejected if:
+    // 1. Status is PENDING
+    // 2. providerId is null (was unassigned)
+    // 3. There's a rejection event
+    return (
+      rejectionEvent !== undefined ||
+      (booking.status === 'PENDING' && !booking.providerId && events.some(e => e.toStatus === 'ASSIGNED'))
+    );
+  };
+
   const shouldShowCompleteButton = () => {
     if (!booking || !user) return false;
     // Only show for CUSTOMER role
     if (user.role !== 'CUSTOMER') return false;
+    // Don't show if booking was rejected
+    if (isBookingRejected()) return false;
     // Only show for ASSIGNED or IN_PROGRESS status
     return booking.status === 'ASSIGNED' || booking.status === 'IN_PROGRESS';
   };
@@ -237,6 +262,35 @@ const BookingDetail = () => {
             )}
           </div>
 
+          {/* Rejection Message */}
+          {isBookingRejected() && (
+            <div style={{ 
+              marginBottom: '32px', 
+              paddingBottom: '24px', 
+              borderBottom: '1px solid #eee' 
+            }}>
+              <div className="error-banner" style={{ 
+                background: '#fee', 
+                color: '#c33', 
+                padding: '16px', 
+                borderRadius: '8px',
+                textAlign: 'center',
+                fontWeight: 600
+              }}>
+                ⚠️ Booking was rejected by provider
+              </div>
+              <p style={{ 
+                marginTop: '12px', 
+                color: '#666', 
+                textAlign: 'center',
+                fontSize: '14px'
+              }}>
+                This booking cannot be completed as it was rejected by the service provider.
+              </p>
+            </div>
+          )}
+
+          {/* Complete Button */}
           {shouldShowCompleteButton() && (
             <div style={{ marginBottom: '32px', paddingBottom: '24px', borderBottom: '1px solid #eee' }}>
               <button
