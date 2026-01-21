@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
-import { bookingAPI } from '../../api/api';
+import { bookingAPI, ratingAPI } from '../../api/api';
 import './Customer.css';
 
 const BookingDetail = () => {
@@ -14,6 +14,14 @@ const BookingDetail = () => {
   const [error, setError] = useState('');
   const [completing, setCompleting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  
+  // Rating state
+  const [existingRating, setExistingRating] = useState(null);
+  const [selectedRating, setSelectedRating] = useState(0);
+  const [reviewText, setReviewText] = useState('');
+  const [submittingRating, setSubmittingRating] = useState(false);
+  const [ratingError, setRatingError] = useState('');
+  const [ratingSuccess, setRatingSuccess] = useState('');
 
   useEffect(() => {
     fetchBooking();
@@ -24,6 +32,8 @@ const BookingDetail = () => {
       const response = await bookingAPI.getBooking(id);
       setBooking(response.data.booking);
       setEvents(response.data.events || []);
+      // Set existing rating from booking response if it exists
+      setExistingRating(response.data.booking.rating || null);
     } catch (err) {
       setError('Failed to load booking');
       console.error(err);
@@ -76,6 +86,68 @@ const BookingDetail = () => {
     if (user.role !== 'CUSTOMER') return false;
     // Only show for ASSIGNED or IN_PROGRESS status
     return booking.status === 'ASSIGNED' || booking.status === 'IN_PROGRESS';
+  };
+
+  const shouldShowRatingForm = () => {
+    if (!booking || !user) return false;
+    // Only show for CUSTOMER role
+    if (user.role !== 'CUSTOMER') return false;
+    // Only show if booking is COMPLETED and has no rating yet
+    return booking.status === 'COMPLETED' && !existingRating;
+  };
+
+  const handleRatingSubmit = async () => {
+    if (!selectedRating || selectedRating < 1 || selectedRating > 5) {
+      setRatingError('Please select a rating between 1 and 5 stars');
+      return;
+    }
+
+    setSubmittingRating(true);
+    setRatingError('');
+    setRatingSuccess('');
+
+    try {
+      const response = await ratingAPI.addRating({
+        bookingId: id,
+        rating: selectedRating,
+        review: reviewText.trim() || null,
+      });
+      
+      setExistingRating(response.data);
+      setRatingSuccess('Thank you for your rating!');
+      setSelectedRating(0);
+      setReviewText('');
+      
+      // Refresh booking to get updated data
+      await fetchBooking();
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || 'Failed to submit rating';
+      setRatingError(errorMsg);
+      console.error('Submit rating error:', err);
+    } finally {
+      setSubmittingRating(false);
+    }
+  };
+
+  const renderStarRating = (rating, interactive = false, onStarClick = null) => {
+    return (
+      <div className="star-rating" style={{ display: 'flex', gap: '4px', marginBottom: '12px' }}>
+        {[1, 2, 3, 4, 5].map((star) => (
+          <span
+            key={star}
+            onClick={interactive && onStarClick ? () => onStarClick(star) : undefined}
+            style={{
+              fontSize: '28px',
+              color: star <= rating ? '#ff9800' : '#ddd',
+              cursor: interactive && onStarClick ? 'pointer' : 'default',
+              transition: 'color 0.2s',
+            }}
+          >
+            ★
+          </span>
+        ))}
+      </div>
+    );
   };
 
   if (loading) {
@@ -175,6 +247,90 @@ const BookingDetail = () => {
               >
                 {completing ? 'Marking as Completed...' : 'Mark as Completed'}
               </button>
+            </div>
+          )}
+
+          {/* Rating Section */}
+          {booking.status === 'COMPLETED' && user?.role === 'CUSTOMER' && (
+            <div style={{ marginBottom: '32px', paddingBottom: '24px', borderBottom: '1px solid #eee' }}>
+              <h3 style={{ margin: '0 0 20px 0', color: '#333' }}>Rate Your Experience</h3>
+              
+              {existingRating ? (
+                // Show existing rating (read-only)
+                <div className="rating-display" style={{ background: '#f9f9f9', padding: '20px', borderRadius: '8px' }}>
+                  <div style={{ marginBottom: '12px' }}>
+                    <span style={{ fontWeight: 600, color: '#333', marginRight: '12px' }}>Your Rating:</span>
+                    {renderStarRating(existingRating.rating, false)}
+                  </div>
+                  {existingRating.review && (
+                    <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #eee' }}>
+                      <div style={{ fontWeight: 600, color: '#333', marginBottom: '8px' }}>Your Review:</div>
+                      <div style={{ color: '#666', lineHeight: '1.6' }}>{existingRating.review}</div>
+                    </div>
+                  )}
+                  <div style={{ marginTop: '12px', fontSize: '14px', color: '#999' }}>
+                    Rated on {formatDate(existingRating.createdAt)}
+                  </div>
+                </div>
+              ) : shouldShowRatingForm() ? (
+                // Show rating form
+                <div className="rating-form" style={{ background: '#f9f9f9', padding: '20px', borderRadius: '8px' }}>
+                  {ratingSuccess && (
+                    <div className="success-banner" style={{ marginBottom: '16px' }}>
+                      {ratingSuccess}
+                    </div>
+                  )}
+                  
+                  {ratingError && (
+                    <div className="error-banner" style={{ marginBottom: '16px' }}>
+                      {ratingError}
+                    </div>
+                  )}
+
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#333' }}>
+                      Rate this service:
+                    </label>
+                    {renderStarRating(selectedRating, true, setSelectedRating)}
+                    {selectedRating > 0 && (
+                      <div style={{ fontSize: '14px', color: '#666', marginTop: '4px' }}>
+                        {selectedRating} {selectedRating === 1 ? 'star' : 'stars'}
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#333' }}>
+                      Review (optional):
+                    </label>
+                    <textarea
+                      value={reviewText}
+                      onChange={(e) => setReviewText(e.target.value)}
+                      placeholder="Share your experience..."
+                      rows={4}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        border: '1px solid #ddd',
+                        borderRadius: '6px',
+                        fontSize: '16px',
+                        fontFamily: 'inherit',
+                        resize: 'vertical',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </div>
+
+                  <button
+                    onClick={handleRatingSubmit}
+                    disabled={submittingRating || selectedRating < 1}
+                    className="btn-primary"
+                    style={{ width: '100%' }}
+                  >
+                    {submittingRating ? 'Submitting...' : 'Submit Rating'}
+                  </button>
+                </div>
+              ) : null}
             </div>
           )}
 

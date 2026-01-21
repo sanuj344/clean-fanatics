@@ -76,4 +76,10 @@ export const paymentAPI = {
   verifyPayment: (data) => api.post('/payments/verify', data),
 };
 
+// Rating APIs
+export const ratingAPI = {
+  addRating: (data) => api.post('/ratings', data),
+  getRatingByBooking: (bookingId) => api.get(`/ratings/booking/${bookingId}`),
+};
+
 export default api;

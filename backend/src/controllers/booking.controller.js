@@ -118,6 +118,7 @@ export const getBookingWithEvents = async (req, res) => {
         service: true,
         customer: true,
         provider: true,
+        rating: true, // Include rating if exists
       },
     });
 
@@ -153,6 +154,7 @@ export const completeBooking = async (req, res) => {
         service: true,
         customer: true,
         provider: true,
+        rating: true, // Include rating if exists
       },
     });
 
